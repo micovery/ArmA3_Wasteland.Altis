@@ -37,13 +37,19 @@ if (_uid call isAdmin) then
 					closeDialog 0;
 					execVM "client\systems\adminPanel\vehicleManagement.sqf";
 				};
-				case 2: //Tags
-				{
-					execVM "client\systems\adminPanel\playerTags.sqf";
-				};
-				case 3: //Teleport
-				{
+				case 2: //Spectator Cam
+			    {
 					closeDialog 0;
+					if (isnil {RscSpectator_camera}) then {RscSpectator_allowFreeCam = true; cutrsc ['RscSpectator','plain'];if (!isNil "notifyAdminMenu") then { ["SpectatorCam", "used"] call notifyAdminMenu };} else {cuttext ['','plain']};
+			    };
+			    case 3: //Tags
+			    {
+					execVM "client\systems\adminPanel\playerTags.sqf";
+					if (!isNil "notifyAdminMenu") then { ["PlayerTag","used"] call notifyAdminMenu };
+			    };
+			    case 4: //Teleport
+			    {
+	                closeDialog 0;
 					["A3W_teleport", "onMapSingleClick",
 					{
 						vehicle player setPos _pos;
@@ -52,27 +58,27 @@ if (_uid call isAdmin) then
 						true
 					}] call BIS_fnc_addStackedEventHandler;
 					hint "Click on map to teleport";
-				};
-				case 4: //Money
-				{
+			    };
+	            case 5: //Money
+			    {
 					_money = 5000;
 					player setVariable ["cmoney", (player getVariable ["cmoney",0]) + _money, true];
 					if (!isNil "notifyAdminMenu") then { ["money", _money] call notifyAdminMenu };
-				};
-				case 5: //Debug Menu
-				{
-					closeDialog 0;
-					execVM "client\systems\adminPanel\loadDebugMenu.sqf";
-				};
-				case 6: //Object search menu
-				{
-					closeDialog 0;
-					execVM "client\systems\adminPanel\loadObjectSearch.sqf";
-				};
-				case 7: // toggle God mode
-				{
-					execVM "client\systems\adminPanel\toggleGodMode.sqf";
-				};
+			    };
+	            case 6: //Debug Menu
+			    {
+	            	closeDialog 0;
+	                execVM "client\systems\adminPanel\loadDebugMenu.sqf";
+			    };
+				case 7: //Object search menu
+			    {
+	            	closeDialog 0;
+	                execVM "client\systems\adminPanel\loadObjectSearch.sqf";
+			    };
+			    case 8: // toggle God mode
+			    {
+			    	execVM "client\systems\adminPanel\toggleGodMode.sqf";
+			    };
 			};
 		};
 		case (!isNull _displayDebug): //Debug panel
@@ -91,28 +97,33 @@ if (_uid call isAdmin) then
 					closeDialog 0;
 					execVM "client\systems\generalStore\loadGenStore.sqf";
 				};
-				case 2: //Access Vehicle Store
+				case 2: //Access ATM Interface
+				{
+					closeDialog 0;
+					execVM "addons\atm\atm.sqf";
+				};
+				case 3: //Access Vehicle Store
 				{
 					closeDialog 0;
 					execVM "client\systems\vehicleStore\loadVehicleStore.sqf";
 				};
-				case 3: //Access Respawn Dialog
-				{
-					closeDialog 0;
+			    case 4: //Access Respawn Dialog
+			    {
+	                closeDialog 0;
 					true spawn client_respawnDialog;
-				};
-				case 4: //Access Proving Grounds
-				{
-					closeDialog 0;
+			    };
+			    case 5: //Access Proving Grounds
+			    {
+	                closeDialog 0;
 					createDialog "balca_debug_main";
-				};
-				case 5: //Show server FPS function
-				{
+			    };
+	            case 6: //Show server FPS function
+			    {      
 					hint format["Server FPS: %1",serverFPS];
-				};
-				case 6: //Test Function
-				{
-					_group = createGroup civilian;
+			    };
+	            case 7: //Test Function
+			    {
+                    _group = createGroup civilian;
 					_leader = _group createunit ["C_man_polo_1_F", getPos player, [], 0.5, "Form"];
 
 					_leader addMagazine "RPG32_HE_F";

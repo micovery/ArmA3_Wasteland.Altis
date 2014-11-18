@@ -96,6 +96,23 @@
 			<English>You have been teamkilled by %2 player %1&lt;br/&gt;&lt;br/&gt;If this was an accident, forgive him, otherwise they should explain their actions.&lt;br/&gt;&lt;br/&gt;If the player does not apologize, punish him.</English>
 		</Key>
 	</Package>
+	<Package name="ATM_Menu">
+		<Key ID="STR_ATM_Title">
+			<Original>Bank Account Management</Original>
+		</Key>
+		<Key ID="STR_ATM_Withdraw">
+			<Original>Withdraw</Original>
+		</Key>
+		<Key ID="STR_ATM_Deposit">
+			<Original>Deposit</Original>
+		</Key>
+		<Key ID="STR_ATM_Transfer">
+			<Original>Transfer</Original>
+		</Key>
+		<Key ID="STR_ATM_Close">
+			<Original>Close</Original>
+		</Key>
+	</Package>
 	<Package name="Errors">
 		<Key ID="STR_WL_Errors_InProgress">
 			<English>You are already performing another action!</English>
