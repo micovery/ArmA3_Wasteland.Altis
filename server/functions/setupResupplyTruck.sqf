@@ -19,7 +19,7 @@ _this setRepairCargo 0;
 _marker = createMarker ["Service_Icon_" + netId _this, getPosATL _this];
 _marker setMarkerShape "ICON";
 _marker setMarkerType "o_service";
-_marker setMarkerText "Service";
+_marker setMarkerText "Vehicle Service+Resupply";
 _marker setMarkerColor "ColorYellow";
 _marker setMarkerSize [0.5, 0.5];
 _marker setMarkerDir 270;

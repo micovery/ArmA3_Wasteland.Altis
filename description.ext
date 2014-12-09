@@ -21,7 +21,7 @@ class Header
 	minPlayers=1;
 	maxPlayers=145; // 144 players, 1 headless client
 };
-author="UKGZ - A3Wasteland.com"; // it would be if you could keep "A3Wasteland.com" in the name, like "YourName and A3Wasteland.com" :)
+author="UKGZ uk-gaming-zone.co.uk - A3Wasteland.com"; // it would be if you could keep "A3Wasteland.com" in the name, like "YourName and A3Wasteland.com" :)
 onLoadName = "UKGZ A3Wasteland Altis"; // it would be great if you could keep "A3" in the name, like "ABC A3Wasteland" instead of "ABC Wasteland" :)
 onLoadMission = "Wasteland is a harsh survival sandbox where two teams and independent players fight for survival.";
 overviewText = "Wasteland is a harsh survival sandbox where two teams and independent players fight for survival.";
@@ -54,8 +54,9 @@ loadScreen = "mapConfig\Loading.jpg";
 #include "client\systems\playerMenu\dialog\teamkill_dialog.hpp"
 #include "addons\proving_ground\PG_config.hpp"
 #include "addons\outlw_magRepack\MagRepack_config.hpp"
-#include "addons\atm\defines.hpp"
-#include "addons\atm\bank.hpp"
+#include "client\systems\hud\dialog\downloadData.hpp"
+#include "addons\bank\ui.hpp"
+#include "addons\bank\bank_menu.hpp"
 
 class RscTitles
 {

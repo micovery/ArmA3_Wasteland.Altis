@@ -3,8 +3,8 @@
 	|----
 		-Author: Outlawled
 		-Created: 7 March 2013
-		-Updated: 5 February 2014
-		-Version: 3.1.0 (Script)
+		-Updated: 5 December 2014
+		-Version: 3.1.1 (Script)
 		-Description:	- Allows the player to repack the ammo in his magazines.
 						- Default keybinding to open the Mag Repack dialog is "Ctrl+R", this can be customized via the options menu in the Mag Repack dialog.
 						- Pressing "Shift+Ctrl+Alt+Backspace" will reset the keybinding to the default setting (in case the player forgets what he changed his keybinding to).
@@ -23,8 +23,8 @@ if (isClass(configFile >> "CfgPatches" >> "outlw_magRepack")) exitWith {};
 
 disableSerialization;
 
-outlw_MR_version = "3.1.0";
-outlw_MR_date = "5 February 2014";
+outlw_MR_version = "3.1.1";
+outlw_MR_date = "5 December 2014";
 
 outlw_MR_defaultKeybinding = [false, true, false, 19];
 

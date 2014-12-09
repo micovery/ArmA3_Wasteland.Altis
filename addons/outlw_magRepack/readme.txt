@@ -3,9 +3,9 @@
 | Mag Repack |
 --------------
 
-	- Version: 3.1.0
+	- Version: 3.1.1
 	- Created: 7 March 2013
-	- Updated: 5 February 2014
+	- Updated: 5 December 2014
 
 ----------
 | Author |
@@ -43,6 +43,9 @@
 -------------
 | Changelog |
 -------------
+	- 3.1.1
+		- Fixed: RPT error.
+
 	- 3.1.0
 		- Fixed: Error dialogs popping up about the scrollbars.
 		- Removed: Mag Repack logo from the bottom left of the main dialog.

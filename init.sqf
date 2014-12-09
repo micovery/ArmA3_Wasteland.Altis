@@ -10,13 +10,8 @@
 
 enableSaving [false, false];
 
-currMissionDir = compileFinal str call
-{
-	private "_arr";
-	_arr = toArray str missionConfigFile;
-	_arr resize (count _arr - 15);
-	toString _arr
-};
+_descExtPath = str missionConfigFile;
+currMissionDir = compileFinal str (_descExtPath select [0, count _descExtPath - 15]);
 
 X_Server = false;
 X_Client = false;
@@ -36,13 +31,12 @@ A3W_scriptThreads = [];
 [] execVM "config.sqf";
 [] execVM "storeConfig.sqf"; // Separated as its now v large
 [] execVM "briefing.sqf";
-[] execVM "addons\atm\bank_init.sqf";
 
 if (!isDedicated) then
 {
 	[] spawn
 	{
-		9999 cutText ["Welcome to A3Wasteland, please wait for your client to initialize", "BLACK", 0.01];
+		9999 cutText ["Welcome to UKGZ A3Wasteland, please wait for your client to initialize", "BLACK", 0.01];
 
 		waitUntil {!isNull player};
 		removeAllWeapons player;
@@ -67,7 +61,8 @@ if (isServer) then
 [] execVM "addons\R3F_ARTY_AND_LOG\init.sqf";
 [] execVM "addons\proving_ground\init.sqf";
 [] execVM "addons\scripts\DynamicWeatherEffects.sqf";
-[] execVM "addons\zlt_fastrope\zlt_fastrope.sqf";
 [] execVM "addons\JumpMF\init.sqf";
 [] execVM "addons\EtV\init.sqf";
 [] execVM "addons\outlw_magRepack\MagRepack_init_sv.sqf";
+[] execVM "addons\laptop\init.sqf";
+[] execVM "addons\zlt_fastrope\zlt_fastrope.sqf";

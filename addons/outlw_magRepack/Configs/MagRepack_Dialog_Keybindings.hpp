@@ -230,7 +230,7 @@ class MagRepack_Dialog_Keybindings
 		class KB_BG_KeyDescription: outlw_MR_RscPicture
 		{
 			idc = 2570;
-			text = "outlw_magRepack\Images\MR_TargetGradient.paa";
+			text = "addons\outlw_magRepack\Images\MR_TargetGradient.paa";
 			
 			x = 10.875 * GUI_GRID_W + GUI_GRID_X;
 			y = 11.375 * GUI_GRID_H + GUI_GRID_Y;
@@ -240,7 +240,7 @@ class MagRepack_Dialog_Keybindings
 		class KB_BG_ModDescription: outlw_MR_RscPicture
 		{
 			idc = 2571;
-			text = "outlw_magRepack\Images\MR_TargetGradient.paa";
+			text = "addons\outlw_magRepack\Images\MR_TargetGradient.paa";
 			
 			x = 10.875 * GUI_GRID_W + GUI_GRID_X;
 			y = 12.625 * GUI_GRID_H + GUI_GRID_Y;

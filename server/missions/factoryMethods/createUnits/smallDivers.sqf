@@ -48,13 +48,6 @@ _man3 addMagazine "20Rnd_556x45_UW_Mag";
 _leader = leader _group;
 
 {
-	if (random 1 < 0.6) then    							// 60% chance unit has no NVG but flashlight
-	{
-		_x addPrimaryWeaponItem "acc_flashlight";
-		_x unassignItem "NVGoggles";					// unassign and remove NVG if they have them
-		_x removeItem "NVGoggles";
-		_x enablegunlights "forceOn";					//set to "forceOn" to force use of lights (during day too default = AUTO)
-	};
 	_x spawn refillPrimaryAmmo;
 	_x call setMissionSkill;
 	_x addRating 9999999;

@@ -15,13 +15,8 @@ _soldier = _group createUnit [_soldierTypes call BIS_fnc_selectRandom, _position
 _soldier addUniform "U_B_Ghilliesuit";
 [_soldier, _weaponTypes call BIS_fnc_selectRandom, 3] call BIS_fnc_addWeapon;
 
-if (random 1 < 0.6) then    							// 60% chance soldier has no NVG but flashlight
-{
-	_soldier addPrimaryWeaponItem "acc_flashlight";
-	_soldier unassignItem "NVGoggles";					// unassign and remove NVG if they have them
-	_soldier removeItem "NVGoggles";
-	_soldier enablegunlights "forceOn";					//set to "forceOn" to force use of lights (during day too default = AUTO)
-};
+_soldier addPrimaryWeaponItem "acc_flashlight";
+_soldier enablegunlights "forceOn";					//set to "forceOn" to force use of lights (during day too default = AUTO)
 
 _soldier spawn refillPrimaryAmmo;
 _soldier call setMissionSkill;

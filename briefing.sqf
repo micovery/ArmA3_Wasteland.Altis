@@ -13,6 +13,20 @@ player createDiarySubject ["credits", "Credits"];
 
 player createDiaryRecord ["changelog",
 [
+"UKGZ",
+"
+<br/> [Added] Ear Plugs: Pause/Break key
+<br/> [Added] Mag Repack: left Ctrl + R
+<br/> [Added] DLC-heli Pilot/Gunner option for non-DLC players
+<br/> [Added] R.I.P. Marker on corpse location after respawn
+<br/> [Added] Extra missions: Hostile Jet, Smugglers, Snipers & Hack laptop 
+<br/> [Added] Side mission: Town Takeover
+"
+]];
+
+
+player createDiaryRecord ["changelog",
+[
 "v1.0b",
 "
 <br/> [Added] Helicopters DLC content
@@ -32,6 +46,7 @@ player createDiaryRecord ["changelog",
 <br/> [Fixed] Blinking fog
 <br/> [Fixed] Clipped numbers on scoreboard
 <br/> [Fixed] Minor other optimizations and fixes
+<br/> [Fixed] Issue with jumpsystem causing spideyjumps
 "
 ]];
 
@@ -268,6 +283,7 @@ player createDiaryRecord ["credits",
 <br/>	* spunFIN (BIS forums)
 <br/>	* Tonic (BIS forums)
 <br/>	* wiking.at (A3W forums)
+<br/>   * Zenophon (BIS Forums)
 <br/>
 <br/><font size='16'>Thanks A LOT to everyone involved for the help and inspiration!</font>
 "
@@ -292,9 +308,9 @@ player createDiaryRecord ["infos",
 <br/>
 <br/>* There are very aggressive AI characters that spawn with most missions and will protect the mission objectives with deadly force, be aware of them.
 <br/>
-<br/>* * Use ATM to save your money, in the event that you are killed, it will be safe.
+<br/>* Use ATM to save your money, in the event that you are killed, it will be safe.
 <br/>
-<br/>* * Service/Resupply vehicles at service points using BANK money.
+<br/>* Service/Resupply vehicles at service points using BANK money.
 "
 ]];
 
@@ -302,7 +318,7 @@ player createDiaryRecord ["infos",
 [
 "About Wasteland",
 "
-<br/>Wasteland is a team versus team versus team sandbox survival experience. The objective of this mission is to rally your faction, scavenge supplies, weapons, and vehicles, and destroy the other factions. It is survival at its best! Keep in mind this is a work in progress, please direct your reports to http://forums.a3wasteland.com/
+<br/>Wasteland is a team versus team versus team sandbox survival experience. The objective of this mission is to rally your faction, scavenge supplies, weapons, and vehicles, and destroy the other factions. It is survival at its best! Keep in mind this is a work in progress, please direct your reports to http://uk-gaming-zone.co.uk/
 <br/>
 <br/>FAQ:
 <br/>

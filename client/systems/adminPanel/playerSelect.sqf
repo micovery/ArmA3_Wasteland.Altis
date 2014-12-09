@@ -110,6 +110,8 @@ if (_uid call isAdmin) then
 				if(getPlayerUID _x == _targetUID) exitWith
 				{
 					_x setVariable["cmoney",0,true];
+					_x setVariable["bmoney",0,true];
+					
 				};
 			}forEach playableUnits;
 		};

@@ -100,7 +100,7 @@ if (_uid call isAdmin) then
 				case 2: //Access ATM Interface
 				{
 					closeDialog 0;
-					execVM "addons\atm\atm.sqf";
+					[player] call bank_menu_dialog;
 				};
 				case 3: //Access Vehicle Store
 				{

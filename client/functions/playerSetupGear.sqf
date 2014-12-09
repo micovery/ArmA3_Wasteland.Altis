@@ -34,7 +34,6 @@ if (hmd _player != "") then { _player unlinkItem hmd _player };
 _player linkItem "NVGoggles";
 
 _player addBackpack "B_AssaultPack_rgr";
-
 _player addMagazine "9Rnd_45ACP_Mag";
 _player addWeapon "hgun_ACPC2_F";
 _player addMagazine "9Rnd_45ACP_Mag";

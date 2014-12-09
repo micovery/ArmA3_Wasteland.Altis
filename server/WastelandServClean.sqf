@@ -11,8 +11,8 @@ if (!isServer) exitWith {};
 
 // configure cleanup below this line
 
-#define CLEANUP_INTERVAL (5*60) // Interval to run the cleanup
-#define ITEM_CLEANUP_TIME (30*60) // Dropped player items cleanup time
+#define CLEANUP_INTERVAL (10*60) // Interval to run the cleanup
+#define ITEM_CLEANUP_TIME (60*60) // Dropped player items cleanup time
 #define DEBRIS_CLEANUP_TIME (10*60) // Vehicle crash crater/debris cleanup time (actual vehicle wreck cleanup is handled through description.ext parameters)
 #define GROUP_CLEANUP_TIME (1*60) // How long a group must have been empty before deleting it
 

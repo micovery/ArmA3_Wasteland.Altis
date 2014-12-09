@@ -61,10 +61,14 @@ R3F_LOG_CFG_objets_heliportables =
 	"MRAP_01_base_F",
 	"MRAP_02_base_F",
 	"MRAP_03_base_F",
+	"Truck_01_base_F",
+	"Truck_02_base_F",
+	"Truck_03_base_F",
 	"UGV_01_base_F",
 	"SDV_01_base_F",
 	"Boat_Civil_01_base_F",
-	"Boat_Armed_01_base_F"
+	"Boat_Armed_01_base_F",
+	"Wheeled_APC_F"
 ];
 
 
@@ -129,6 +133,7 @@ R3F_LOG_CFG_objets_transportables =
 	["Land_CargoBox_V1_F", 5],
 	["Land_Cargo_Patrol_V1_F", 7],
 	["Land_Cargo_Tower_V1_F", 30],
+	["Land_Cargo_HQ_V1_F", 30], // Added on player request
 	["Land_CncBarrier_F", 4],
 	["Land_CncBarrierMedium_F", 4],
 	["Land_CncBarrierMedium4_F", 4],
@@ -186,6 +191,7 @@ R3F_LOG_CFG_objets_deplacables =
 	"Land_CargoBox_V1_F",
 	"Land_Cargo_Patrol_V1_F",
 	"Land_Cargo_Tower_V1_F",
+	"Land_Cargo_HQ_V1_F", // Added on player request
 	"Land_CncBarrier_F",
 	"Land_CncBarrierMedium_F",
 	"Land_CncBarrierMedium4_F",
