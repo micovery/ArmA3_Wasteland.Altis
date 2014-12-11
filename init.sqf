@@ -57,6 +57,10 @@ if (isServer) then
 	[] execVM "server\init.sqf";
 };
 
+//[AiCacheDistance(players),TargetFPS(-1 for Auto),Debug,CarCacheDistance,AirCacheDistance,BoatCacheDistance]execvm "addons\zbe_cache\main.sqf";
+
+if (isServer) then {[3400,-1,true,1000,2000,2000]execvm "addons\zbe_cache\main.sqf"};
+
 //init 3rd Party Scripts
 [] execVM "addons\R3F_ARTY_AND_LOG\init.sqf";
 [] execVM "addons\proving_ground\init.sqf";

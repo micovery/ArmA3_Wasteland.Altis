@@ -67,7 +67,7 @@ interact_check_trx_minimum = {
 	private["_minimum"];
 	_minimum = 10;
 	if (_amount < _minimum) exitWith {
-		player groupChat format["The minimum about for a bank transaction is $%1",strM(_minimum)];
+		player groupChat format["The minimum amount for a bank transaction is $%1",strM(_minimum)];
 		true
 	};
 	false

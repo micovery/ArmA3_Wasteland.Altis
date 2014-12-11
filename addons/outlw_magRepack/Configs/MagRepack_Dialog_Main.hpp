@@ -64,7 +64,7 @@ class MagRepack_Dialog_Main
 		{
 			idc = 1200;
 
-			text = "outlw_magRepack\Images\MR_logo.paa";
+			text = "addons\outlw_magRepack\Images\MR_logo.paa";
 			x = 4.5 * GUI_GRID_W + GUI_GRID_X;
 			y = 17 * GUI_GRID_H + GUI_GRID_Y;
 			w = 5.5 * GUI_GRID_W;
