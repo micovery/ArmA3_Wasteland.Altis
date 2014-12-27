@@ -25,15 +25,18 @@ A3W_vehicleLifetime = OR_SCALAR(A3W_vehicleLifetime,0);
 A3W_vehicleMaxUnusedTime = OR_SCALAR(A3W_vehicleMaxUnusedTime,0);
 A3W_vehicle_saveInterval = OR_POSITIVE(A3W_vehicle_saveInterval,60);
 A3W_locked_vehicles_list = OR_ARRAY(A3W_locked_vehicles_list,[]);
+A3W_storageLifetime = OR_SCALAR(A3W_storageLifetime,0);
+
 
 
 A3W_healthTime = OR_POSITIVE(A3W_healthTime,60*5);
 A3W_hungerTime = OR_POSITIVE(A3W_hungerTime,60*60);
 A3W_thirstTime = OR_POSITIVE(A3W_thirstTime,60*50);
+
 publicVariable "A3W_healthTime";
 publicVariable "A3W_hungerTime";
 publicVariable "A3W_thirstTime";
-
+publicVariable "A3W_storageLifetime";
 
 
 diag_log format["[INFO] config: A3W_purchasedVehicleSaving = %1", cfg_purchasedVehicleSaving_on];
@@ -56,6 +59,7 @@ diag_log format["[INFO] config: A3W_playersList_saveInterval = %1", A3W_playersL
 diag_log format["[INFO] config: A3W_vehicle_saveInterval = %1", A3W_vehicle_saveInterval];
 diag_log format["[INFO] config: A3W_vehicleMaxUnusedTime = %1", A3W_vehicleMaxUnusedTime];
 diag_log format["[INFO] config: A3W_vehicleLifetime = %1", A3W_vehicleLifetime];
+diag_log format["[INFO] config: A3W_storageLifetime = %1", A3W_storageLifetime];
 
 diag_log ("[INFO] config: A3W_locked_vehicles_list = " + str(A3W_locked_vehicles_list));
 diag_log ("[INFO] config: A3W_saveable_vehicles_list = " + str(A3W_saveable_vehicles_list));

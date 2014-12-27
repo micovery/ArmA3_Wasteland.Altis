@@ -351,6 +351,87 @@ fn_applyPlayerInfo = {
   } forEach _data;
 };
 
+fn_applyPlayerStorage = {
+  if (!isARRAY(_this)) exitWith {
+    diag_log format["WARNING: No player private storage data"];
+  };
+  init(_data,_this);
+
+
+
+  diag_log "#############################################";
+  diag_log "Dumping _storageData";
+  [_data] call p_dumpHash;
+
+  def(_class);
+  def(_cargo_backpacks);
+  def(_cargo_magazines);
+  def(_cargo_items);
+  def(_cargo_weapons);
+  def(_hours_alive);
+
+  def(_name);
+  def(_value);
+  {
+    _name = _x select 0;
+    _value = _x select 1;
+
+    switch (_name) do
+    {
+      case "Class": {_class = OR(_value,nil)};
+      case "HoursAlive": { _hours_alive = OR(_value,nil);};
+      case "Weapons": { _cargo_weapons = OR(_value,nil);};
+      case "Items": { _cargo_items = OR(_value,nil);};
+      case "Magazines": { _cargo_magazines = OR(_value,nil);};
+      case "Backpacks": { _cargo_backpacks = OR(_value,nil);};
+      case "HoursAlive": { _hours_alive = OR(_value,nil);};
+    };
+  } forEach _data;
+
+  if (!isSTRING(_class)) exitWith {
+    diag_log format["WARNING: There is no container class for private storage"];
+  };
+
+  if (isSCALAR(_hours_alive) && {A3W_storageLifetime > 0 && {_hours_alive > A3W_storageLifetime}}) exitWith {
+    player commandChat format["WARNING: Your private storage is over %1 hours, it has been reset"];
+    diag_log format["Private storage for %1 (%2) has been alive for %3 (max=%4), resetting it", (name player), (getPlayerUID player), _hours_alive, A3W_storageLifetime];
+  };
+
+  def(_obj);
+  _obj = _class createVehicle [0,0,1000];
+  if (!isOBJECT(_obj)) exitWith {
+    diag_log format["WARNING: Could not create storage container of class ""%1""", _class];
+  };
+
+  player setVariable ["storage_box", _obj, true];
+
+  _obj setVariable ["storage_spawningTime", diag_tickTime];
+  if (isSCALAR(_hours_alive)) then {
+    _obj setVariable ["storage_hoursAlive", _hours_alive];
+  };
+
+  if (isARRAY(_cargo_weapons)) then {
+    { _obj addWeaponCargoGlobal _x } forEach _cargo_weapons;
+  };
+
+  if (isARRAY(_cargo_backpacks)) then {
+    {
+      if (not((_x select 0) isKindOf "Weapon_Bag_Base")) then {
+        _obj addBackpackCargoGlobal _x
+      };
+    } forEach _cargo_backpacks;
+  };
+
+  if (isARRAY(_cargo_items)) then {
+    { _obj addItemCargoGlobal _x } forEach _cargo_items;
+  };
+
+  if (isARRAY(_cargo_magazines)) then {
+    { _obj addMagazineCargoGlobal _x } forEach _cargo_magazines;
+  };
+
+};
+
 
 p_restoreInfo = {
   ARGVX2(0,_hash);
@@ -359,8 +440,19 @@ p_restoreInfo = {
   def(_data);
   _data = call _hash;
 
-  _data call fn_applyPlayerInfo;
+  OR(_data,nil) call fn_applyPlayerInfo;
 };
+
+p_restoreStorage = {
+  ARGVX2(0,_hash);
+  if (!isCODE(_hash)) exitWith {};
+  format["%1 call p_restoreStorage;", _this] call p_log_finest;
+  def(_data);
+  _data = call _hash;
+
+  OR(_data,nil) call fn_applyPlayerStorage;
+};
+
 
 p_restoreScore = {
   ARGVX2(0,_hash);
@@ -469,12 +561,14 @@ fn_requestPlayerData = {[] spawn {
   init(_genericDataKey, "PlayerSave");
   init(_infoKey, "PlayerInfo");
   init(_scoreKey, "PlayerScore");
+  init(_storageKey, "PlayerStorage");
+
 
   def(_worldDataKey);
   _worldDataKey = format["%1_%2", _genericDataKey, worldName];
 
   def(_pData);
-  _pData = [_scope, [_genericDataKey, nil], [_worldDataKey, nil], [_infoKey, nil], [_scoreKey, nil]] call stats_get;
+  _pData = [_scope, [_genericDataKey, nil], [_worldDataKey, nil], [_infoKey, nil], [_storageKey, nil], [_scoreKey, nil]] call stats_get;
   if (not(isARRAY(_pData))) exitWith {
     //player data did not load, force him back to lobby
     endMission "LOSER";
@@ -492,6 +586,9 @@ fn_requestPlayerData = {[] spawn {
       };
       case _worldDataKey: {
         _worldData = xGet(_x,1);
+      };
+      case _storageKey: {
+        [xGet(_x,1)] call p_restoreStorage;
       };
       case _infoKey: {
         [xGet(_x,1)] call p_restoreInfo;
