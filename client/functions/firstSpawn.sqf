@@ -120,26 +120,28 @@ if (["A3W_combatAbortDelay", 0] call getPublicVar > 0) then
 {
 	player addEventHandler ["Fired",
 	{
+	  private["_isShop"];
 		// Remove remote explosives if within 100m of a store
 		if (_this select 1 == "Put") then
 		{
 			_ammo = _this select 4;
 
-			if ({_ammo isKindOf _x} count ["PipeBombBase", "ClaymoreDirectionalMine_Remote_Ammo"] > 0) then
+			if ({_ammo isKindOf _x} count ["PipeBombBase", "ClaymoreDirectionalMine_Remote_Ammo", "APERSTripMine_Wire_Ammo", "APERSBoundingMine_Range_Ammo", "APERSMine_Range_Ammo", "SLAMDirectionalMine_Wire_Ammo", "ATMine_Range_Ammo"] > 0) then
 			{
 				_mag = _this select 5;
 				_bomb = _this select 6;
 				_minDist = ["A3W_remoteBombStoreRadius", 100] call getPublicVar;
 
 				{
-					if (_x getVariable ["storeNPC_setupComplete", false] && {_bomb distance _x < _minDist}) exitWith
+				  _isShop = (_x getVariable ["storeNPC_setupComplete", false] || { _x getVariable ["is_parking", false]});
+					if (_isShop && {_bomb distance _x < _minDist}) exitWith
 					{
 						deleteVehicle _bomb;
 						player addMagazine _mag;
 						playSound "FD_CP_Not_Clear_F";
-						titleText [format ["You are not allowed to place remote explosives within %1m of a store.\nThe explosive has been re-added to your inventory.", _minDist], "PLAIN DOWN", 0.5];
+						titleText [format ["You are not allowed to place explosives within %1m of a store.\nThe explosive has been re-added to your inventory.", _minDist], "PLAIN DOWN", 0.5];
 					};
-				} forEach entities "CAManBase";
+				} forEach ((entities "CAManBase") + (entities "Land_Laptop_unfolded_F"));
 			};
 		};
 	}];

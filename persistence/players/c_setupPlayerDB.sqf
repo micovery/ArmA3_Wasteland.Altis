@@ -7,4 +7,5 @@ if (isDedicated) exitWith {};
 
 call compile preProcessFileLineNumbers "persistence\sock\main.sqf";
 call compile preProcessFileLineNumbers "persistence\lib\hash.sqf";
+call compile preProcessFileLineNumbers "persistence\lib\shFunctions.sqf";
 call compile preProcessFileLineNumbers "persistence\players\pFunctions.sqf";

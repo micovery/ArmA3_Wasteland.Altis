@@ -5,9 +5,6 @@
 
 diag_log "oFunctions.sqf loading ...";
 
-
-call compile preProcessFileLineNumbers "persistence\lib\shFunctions.sqf";
-
 #include "macro.h";
 
 o_loadingOrderArray = ["Building","StaticWeapon","ReammoBox_F", "All"];
@@ -54,13 +51,21 @@ o_isSaveable = {
   if ([_obj] call sh_isBeacon) exitWith {
     (cfg_spawnBeaconSaving_on)
   };
-  
+
   if ([_obj] call sh_isWarchest) exitWith {
     (cfg_warchestSaving_on)
   };
-  
+
   if ([_obj] call sh_isStaticWeapon) exitWith {
     (cfg_staticWeaponSaving_on)
+  };
+
+  if (([_obj] call sh_isMine)&&([_obj] call sh_isSaveableMine)) exitWith {
+    (cfg_MineSaving_on)
+  };
+
+  if ([_obj] call sh_isCamera) exitWith {
+    (cfg_cctvCameraSaving_on)
   };
 
   def(_locked);
@@ -80,6 +85,81 @@ o_isLockableObject = {
 };
 
 
+
+o_getMaxLifeTime = {
+  ARGV3(0,_class,"");
+
+  if (isNil "_class") exitWith {A3W_objectLifeTime};
+  if ([_class] call sh_isMine) exitWith {A3W_mineLifeTime};
+
+  A3W_objectLifeTime
+};
+
+o_restoreDirection = {
+  ARGVX3(0,_obj,objNull);
+  ARGVX3(1,_vectors,[]);
+
+  if ([_obj] call sh_isMine) exitWith {
+    //special handling for mines, because setVectorUpAndDir has local effects only ... on mines
+    [[_obj,_vectors], "A3W_fnc_setVectorUpAndDir",true, true] call BIS_fnc_MP;
+  };
+
+  _obj setVectorDirAndUp _vectors;
+};
+
+
+o_restoreHoursAlive_withVars = {
+  ARGVX3(0,_obj,objNull);
+  ARGVX2(1,_hours_alive,0);
+
+  _obj setVariable ["baseSaving_spawningTime", diag_tickTime];
+  if (!isNil "_hours_alive") then {
+    _obj setVariable ["baseSaving_hoursAlive", _hours_alive];
+  };
+};
+
+o_restoreHoursAlive_withGlobals = {
+  ARGVX3(0,_obj,objNull);
+  ARGVX2(1,_hours_alive,0);
+
+  def(_netId);
+  _netId = netId _obj;
+  //diag_log format["_netId = %1", _netId];
+
+  missionNamespace setVariable [format["%1_spawningTime",_netId], diag_tickTime];
+  if (!isNil "_hours_alive") then {
+    missionNamespace setVariable [format["%1_hoursAlive",_netId], _hours_alive];
+  };
+};
+
+o_restoreHoursAlive = {
+  ARGVX3(0,_obj,objNull);
+  ARGVX3(1,_hours_alive,0);
+
+  if ([_obj] call sh_isMine) exitWith {
+    [_obj, OR(_hours_alive,nil)] call o_restoreHoursAlive_withGlobals;
+  };
+
+  [_obj, OR(_hours_alive,nil)] call o_restoreHoursAlive_withVars;
+
+};
+
+o_restoreMineVisibility = {
+  ARGVX3(0,_obj,objNull);
+  ARGVX3(1,_variables,[]);
+
+
+  def(_mineVisibility);
+  _mineVisibility = [_variables, "mineVisibility"] call hash_get_key;
+  if (!isARRAY(_mineVisibility)) exitWith {};
+
+  def(_side);
+  {
+    _side = _x call sh_strToSide;
+    _side revealMine _obj;
+    //diag_log format["Revealing mine %1 to %2", _obj, _side];
+  } forEach _mineVisibility;
+};
 
 o_restoreObject = {_this spawn {
   //diag_log format["%1 call o_restoreObject", _this];
@@ -110,6 +190,7 @@ o_restoreObject = {_this spawn {
   def(_cargo_ammo);
   def(_cargo_fuel);
   def(_cargo_repair);
+  def(_mineVisibility);
   def(_turret0);
   def(_turret1);
   def(_turret2);
@@ -153,13 +234,24 @@ o_restoreObject = {_this spawn {
   
   diag_log format["%1(%2) is being restored.", _object_key, _class];
 
-  if (isSCALAR(_hours_alive) && {A3W_objectLifetime > 0 && {_hours_alive > A3W_objectLifetime}}) exitWith {
-    diag_log format["object %1(%2) has been alive for %3 (max=%4), skipping it", _object_key, _class, _hours_alive, A3W_objectLifetime];
+  def(_max_life_time);
+  _max_life_time = [_class] call o_getMaxLifeTime;
+
+  if (isSCALAR(_hours_alive) && {_max_life_time > 0 && {_hours_alive > _max_life_time}}) exitWith {
+    diag_log format["object %1(%2) has been alive for %3 (max=%4), skipping it", _object_key, _class, _hours_alive, _max_life_time];
   };
-  
+
+  def(_isMine);
+  _isMine = [_class] call sh_isMine;
   def(_obj);
-  _obj = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
-  _obj allowDamage false; //set damage to false immediately to avoid taking fall damage
+  if (_isMine) then {
+    _obj = createMine[_class, _pos, [], 0];
+  }
+  else {
+    _obj = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
+    _obj allowDamage false; //set damage to false immediately to avoid taking fall damage
+  };
+
   if (!isOBJECT(_obj)) exitWith {
     diag_log format["object %1(%2) could not be created.", _object_key, _class];
   };
@@ -174,6 +266,11 @@ o_restoreObject = {_this spawn {
   if (!isBOOLEAN(_objectLocked) && {[_obj] call o_isLockableObject}) then {
     _obj setVariable ["objectLocked", true, true];
   };
+  
+  //Mine is revealed for all players in a side. Should do sth with independent side when it's possible.
+  if (_isMine) then {
+    [_obj,_variables] call o_restoreMineVisibility;
+  };
 
 
   if (not([_obj] call o_isSaveable)) exitWith {
@@ -184,15 +281,9 @@ o_restoreObject = {_this spawn {
 
   
   _obj setPosWorld ATLtoASL _pos;
-  if (isARRAY(_dir)) then {
-    _obj setVectorDirAndUp _dir;
-  };
-  
-  _obj setVariable ["baseSaving_spawningTime", diag_tickTime];
-  if (isSCALAR(_hours_alive)) then {
-    _obj setVariable ["baseSaving_hoursAlive", _hours_alive];
-  };
-  
+  [_obj, OR(_dir,nil)] call o_restoreDirection;
+  [_obj, OR(_hours_alive,nil)] call o_restoreHoursAlive;
+
 
   if (isSCALAR(_damage)) then {
     _obj setDamage _damage;
@@ -212,6 +303,12 @@ o_restoreObject = {_this spawn {
   if ([_obj] call sh_isBeacon) then {
     pvar_spawn_beacons pushBack _obj;
     publicVariable "pvar_spawn_beacons";
+  };
+
+  cctv_cameras = OR(cctv_cameras,[]);
+  if ([_obj] call sh_isCamera) then {
+    cctv_cameras pushBack _obj;
+    publicVariable "cctv_cameras";
   };
   
   //restore the stuff inside the object  
@@ -260,8 +357,11 @@ o_restoreObject = {_this spawn {
     createVehicleCrew _obj;
   };
 
-  //objects, warchests, and beacons
-  tracked_objects_list pushBack _obj;
+  if (not([_obj] call sh_isMine)) exitWith { //don't put mines in the tracked objects list (we use allMines)
+    //objects, warchests, and beacons
+    tracked_objects_list pushBack _obj;
+  };
+
 
 };};
 
@@ -280,7 +380,7 @@ o_saveList = [];
   if ((o_saveList find _obj) >= 0) exitWith {};
   
   o_saveList pushBack _obj;
-};} forEach [objectList, call genObjectsArray];
+};} forEach [objectList, call genObjectsArray, minesList];
 
 
 o_isInSaveList = {
@@ -331,6 +431,25 @@ o_fillVariables = {
     _variables pushBack ["ownerName", _obj getVariable ["ownerName", "[Beacon]"]];
   };
 
+  if ([_obj] call sh_isCamera) then {
+    _variables pushBack ["a3w_cctv_camera", (_obj getVariable ["a3w_cctv_camera", nil])];
+    _variables pushBack ["camera_name", (_obj getVariable ["camera_name", nil])];
+    _variables pushBack ["camera_owner_type", (_obj getVariable ["camera_owner_type", nil])];
+    _variables pushBack ["camera_owner_value", (_obj getVariable ["camera_owner_value", nil])];
+    _variables pushBack ["mf_item_id", (_obj getVariable ["mf_item_id", nil])];
+  };
+
+  if ([_obj] call sh_isMine) then {
+    init(_mineVisibility,[]);
+    {
+      if (_obj mineDetectedBy _x) then {
+        _mineVisibility pushBack str(_x);
+      }
+    } forEach [EAST,WEST,INDEPENDENT];
+    
+    _variables pushBack ["mineVisibility", _mineVisibility];
+  };
+
   def(_r3fSide);
   _r3fSide = _obj getVariable "R3F_Side";
   if (!isNil "_r3fSide" && {typeName _r3fSide == typeName sideUnknown}) then {
@@ -340,11 +459,90 @@ o_fillVariables = {
   _variables pushBack ["objectLocked", _obj getVariable "objectLocked"];
 };
 
+o_getVehClass = {
+  ARGVX3(0,_obj,objNull);
+
+  def(_class);
+  _class = typeOf _obj;
+
+  if ([_class] call sh_isMine) exitWith {
+    ([_class] call sh_mineAmmo2Vehicle)
+  };
+
+  _class
+};
+
+o_getHoursAlive_withVars = {
+  ARGVX4(0,_obj,objNull,0);
+
+  def(_spawnTime);
+  def(_hoursAlive);
+  _spawnTime = _obj getVariable "baseSaving_spawningTime";
+  _hoursAlive = _obj getVariable "baseSaving_hoursAlive";
+
+  if (!isSCALAR(_spawnTime)) then {
+    _spawnTime = diag_tickTime;
+    _obj setVariable ["baseSaving_spawningTime", _spawnTime, true];
+  };
+
+  if (!isSCALAR(_hoursAlive)) then {
+    _hoursAlive = 0;
+    _obj setVariable ["baseSaving_hoursAlive", _hoursAlive, true];
+  };
+
+  def(_totalHours);
+  _totalHours = _hoursAlive + (diag_tickTime - _spawnTime) / 3600;
+
+  //diag_log format["_obj = %1, _totalHours = %2, _spawnTime = %3, _hoursAlive = %4",_obj, _totalHours, _spawnTime, _hoursAlive];
+
+  (_totalHours)
+};
+
+o_getHoursAlive_withGlobals = {
+  ARGVX4(0,_obj,objNull,0);
+
+  def(_spawnTime);
+  def(_hoursAlive);
+  def(_netId);
+
+  _netId = netId _obj;
+  //diag_log format["_netId = %1", _netId];
+
+  _spawnTime = missionNamespace getVariable format["%1_spawningTime", _netId];
+  _hoursAlive = missionNamespace getVariable format["%1_hoursAlive", _netId];
+
+  if (!isSCALAR(_spawnTime)) then {
+    _spawnTime = diag_tickTime;
+    missionNamespace setVariable [format["%1_spawningTime", _netId], _spawnTime];
+  };
+
+  if (!isSCALAR(_hoursAlive)) then {
+    _hoursAlive = 0;
+    missionNamespace setVariable [format["%1_hoursAlive", _netId], _hoursAlive];
+  };
+
+  def(_totalHours);
+  _totalHours = _hoursAlive + (diag_tickTime - _spawnTime) / 3600;
+
+  //diag_log format["_obj = %1, _totalHours = %2, _spawnTime = %3, _hoursAlive = %4",_obj, _totalHours, _spawnTime, _hoursAlive];
+
+  (_totalHours)
+};
+
+o_getHoursAlive = {
+  ARGVX4(0,_obj,objNull,0);
+
+  if ([_obj] call sh_isMine) exitWith {
+   ([_obj] call o_getHoursAlive_withGlobals)
+  };
+
+  ([_obj] call o_getHoursAlive_withVars)
+};
+
 o_addSaveObject = {
   ARGVX3(0,_list,[]);
   ARGVX3(1,_obj,objNull);
   
-
   if (not([_obj] call o_isSaveable)) exitWith {};
   if (!(alive _obj)) exitWith {};
 
@@ -355,34 +553,16 @@ o_addSaveObject = {
   def(_dir);
   def(_damage);
   def(_allowDamage);
+  def(_totalHours);
 
-  _class = typeOf _obj;
+  _class = [_obj] call o_getVehClass;
    _netId = netId _obj;
   _pos = ASLtoATL getPosWorld _obj;
   _dir = [vectorDir _obj, vectorUp _obj];
   _damage = damage _obj;
   _allowDamage = if (_obj getVariable ["allowDamage", false]) then { 1 } else { 0 };
- 
- 
-  def(_spawnTime);
-  def(_hoursAlive);
-  _spawnTime = _obj getVariable "baseSaving_spawningTime";
-  _hoursAlive = _obj getVariable "baseSaving_hoursAlive";
-  
-  if (isNil "_spawnTime") then {
-    _spawnTime = diag_tickTime;
-    _obj setVariable ["baseSaving_spawningTime", _spawnTime, true];
-  };
-  
-  if (isNil "_hoursAlive") then {
-    _hoursAlive = 0;
-    _obj setVariable ["baseSaving_hoursAlive", _hoursAlive, true];  
-  };
-  
-  def(_totalHours);
-  _totalHours = _hoursAlive + (diag_tickTime - _spawnTime) / 3600;
- 
-  
+  _totalHours = [_obj] call o_getHoursAlive;
+
   init(_variables,[]);
   [_obj,_variables] call o_fillVariables;
  
@@ -481,6 +661,8 @@ o_saveAllObjects = {
   init(_start_time, diag_tickTime);
   init(_last_save, diag_tickTime);
 
+  private["_all_objects"];
+  _all_objects = tracked_objects_list + allMines;
 
   {
     if (!isNil{[_request, _x] call o_addSaveObject}) then {
@@ -496,7 +678,7 @@ o_saveAllObjects = {
       diag_log format["o_saveLoop: %1 objects saved in %2 ticks, save call took %3 ticks", (_bulk_size), (diag_tickTime - _start_time), (_save_end - _save_start)];
       _last_save = _save_end;
     };
-  } forEach (tracked_objects_list);
+  } forEach (_all_objects);
   
   if (count(_request) > 1) then {
     init(_save_start, diag_tickTime);

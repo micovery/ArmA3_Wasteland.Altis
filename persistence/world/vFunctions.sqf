@@ -2,21 +2,27 @@ diag_log "vFunctions.sqf loading ...";
 
 #include "macro.h"
 
-call compile preProcessFileLineNumbers "persistence\lib\shFunctions.sqf";
-
-
-v_restoreVehicle = {_this spawn {
+v_restoreVehicle = {
   //diag_log format["%1 call v_restoreVehicle", _this];
   ARGVX3(0,_data_pair,[]);
+  ARGV4(1,_ignore_expiration,false,false);
+  ARGV3(2,_create_array,[]);
 
   _this = _data_pair;
   ARGVX3(0,_vehicle_key,"");
   ARGVX2(1,_vehicle_hash);
 
-  if (!isCODE(_vehicle_hash)) exitWith {};
 
   def(_vehicle_data);
-  _vehicle_data =  call _vehicle_hash;
+  if (isCODE(_vehicle_hash)) then {
+    _vehicle_data = call _vehicle_hash;
+  }
+  else { if(isARRAY(_vehicle_hash)) then {
+    _vehicle_data = _vehicle_hash;
+  };};
+
+  if (isNil "_vehicle_data") exitWith {};
+
   //diag_log _vehicle_data;
 
 
@@ -40,6 +46,7 @@ v_restoreVehicle = {_this spawn {
   def(_turret0);
   def(_turret1);
   def(_turret2);
+  def(_lock_state);
 
 
   def(_key);
@@ -68,6 +75,7 @@ v_restoreVehicle = {_this spawn {
       case "TurretMagazines3": { _turret2 = OR_ARRAY(_value,nil);};
       case "Fuel": { _fuel = OR(_value,nil);};
       case "Hitpoints": { _hitPoints = OR(_value,nil);};
+      case "LockState": { _lock_state = OR(_value,nil);};
     };
   } forEach _vehicle_data;
 
@@ -82,27 +90,40 @@ v_restoreVehicle = {_this spawn {
   diag_log format["%1(%2) is being restored.", _vehicle_key, _class];
 
 
-  if (isSCALAR(_hours_alive) && {A3W_vehicleLifetime > 0 && {_hours_alive > A3W_vehicleLifetime}}) exitWith {
+  if (not(_ignore_expiration) && {isSCALAR(_hours_alive) && {A3W_vehicleLifetime > 0 && {_hours_alive > A3W_vehicleLifetime}}}) exitWith {
     diag_log format["vehicle %1(%2) has been alive for %3 (max=%4), skipping it", _vehicle_key, _class, _hours_alive, A3W_vehicleLifetime];
   };
 
-  if (isSCALAR(_hours_abandoned) && {A3W_vehicleMaxUnusedTime > 0 && {_hours_abandoned > A3W_vehicleMaxUnusedTime}}) exitWith {
+  if (not(_ignore_expiration) && {isSCALAR(_hours_abandoned) && {A3W_vehicleMaxUnusedTime > 0 && {_hours_abandoned > A3W_vehicleMaxUnusedTime}}}) exitWith {
     diag_log format["vehicle %1(%2) has been abandoned for %3 hours, (max=%4), skipping it", _vehicle_key, _class, _hours_abandoned, A3W_vehicleMaxUnusedTime];
   };
 
 
   def(_obj);
-  _obj = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
+  if (isARRAY(_create_array)) then {
+    _obj = createVehicle _create_array;
+  }
+  else {
+    _obj = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
+  };
+
   if (!isOBJECT(_obj)) exitWith {
     diag_log format["Could not create vehicle of class: %1", _class];
   };
+
+  _obj allowDamage false;
+  [_obj] spawn { ARGVX3(0,_obj,objNull); sleep 3; _obj allowDamage true;}; //hack so that vehicle does not take damage while spawning
+
 
   [_obj, false] call vehicleSetup;
 
   _obj setVariable ["vehicle_key", _vehicle_key, true];
   missionNamespace setVariable [_vehicle_key, _obj];
 
-  _obj setPosWorld ATLtoASL _pos;
+  if (!isARRAY(_create_array)) then {
+    _obj setPosWorld ATLtoASL _pos;
+  };
+
   if (isARRAY(_dir)) then {
     _obj setVectorDirAndUp _dir;
   };
@@ -120,12 +141,14 @@ v_restoreVehicle = {_this spawn {
   // disables thermal equipment on loaded vehicles, comment out if you want thermal
   _obj disableTIEquipment true;
 
-  //lock vehicles form this list
+  //override the lock-state for vehicles form this this
   if ({_obj isKindOf _x} count A3W_locked_vehicles_list > 0) then {
-    _obj lock 2;
-    _obj setVariable ["locked", 2, true];
-    _obj setVariable ["objectLocked", true, true];
-    _obj setVariable ["R3F_LOG_disabled",true,true];
+    _lock_state = 2;
+  };
+
+  if (isSCALAR(_lock_state)) then {
+    _obj lock _lock_state;
+    _obj setVariable ["R3F_LOG_disabled", (_lock_state > 1) , true];
   };
 
   if (isSCALAR(_damage)) then {
@@ -200,7 +223,8 @@ v_restoreVehicle = {_this spawn {
 
   tracked_vehicles_list pushBack _obj;
 
-}};;
+  _obj
+};
 
 
 tracked_vehicles_list = [];
@@ -407,11 +431,6 @@ v_setupVehicleSavedVariables = {
   _variables pushBack ["A3W_missionVehicle", (_obj getVariable ["A3W_missionVehicle",false])];
 
 
-  def(_r3f_log_disabled);
-  _r3f_log_disabled = _obj getVariable "R3F_LOG_disabled";
-  if (defined(_r3f_log_disabled)) then {
-    _variables pushBack ["R3F_LOG_disabled", _r3f_log_disabled];
-  };
 
   def(_r3fSide);
   _r3fSide = _obj getVariable "R3F_Side";
@@ -427,6 +446,7 @@ v_setupVehicleSavedVariables = {
 v_addSaveVehicle = {
   ARGVX3(0,_list,[]);
   ARGVX3(1,_obj,objNull);
+  ARGV4(2,_hashify,false,true);
 
   if (not([_obj] call v_isSaveable)) exitWith {};
 
@@ -503,7 +523,11 @@ v_addSaveVehicle = {
     };
   };
 
-  _list pushBack [_objName, ([
+  def(_lock_state);
+  _lock_state = locked _obj;
+  
+  def(_result);
+  _result = [
     ["Class", _class],
     ["Position", _pos],
     ["Direction", _dir],
@@ -522,9 +546,12 @@ v_addSaveVehicle = {
     ["AmmoCargo", _ammoCargo],
     ["FuelCargo", _fuelCargo],
     ["RepairCargo", _repairCargo],
-    ["Hitpoints", _hitPoints]
-  ] call sock_hash)];
+    ["Hitpoints", _hitPoints],
+    ["LockState", _lock_state]
+  ];
 
+  _result = if (_hashify) then {_result call sock_hash} else {_result};
+  _list pushBack [_objName, _result];
 
   true
 };
@@ -652,7 +679,7 @@ v_loadVehicles = {
   diag_log format["A3Wasteland - will restore %1 vehicles", count(_vehicles)];
   {
     _vIds pushBack (_x select 0);
-    [_x] call v_restoreVehicle;
+    [_x] spawn v_restoreVehicle;
   } forEach _vehicles;
 
   v_loadVehicles_complete = true;

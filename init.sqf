@@ -17,6 +17,9 @@ X_Server = false;
 X_Client = false;
 X_JIP = false;
 
+//disable TAW grass Option 'None'
+tawvd_disablenone = true;
+
 // versionName = ""; // Set in STR_WL_WelcomeToWasteland in stringtable.xml
 
 if (isServer) then { X_Server = true };
@@ -26,6 +29,8 @@ if (isNull player) then { X_JIP = true };
 A3W_scriptThreads = [];
 
 [DEBUG] call compile preprocessFileLineNumbers "globalCompile.sqf";
+[] spawn compile preprocessFileLineNumbers "addons\spawn\functions.sqf";
+
 
 //init Wasteland Core
 [] execVM "config.sqf";
@@ -66,10 +71,21 @@ if (isServer) then
 	diag_log format ["############################# %1 #############################", missionName];
 	diag_log "WASTELAND SERVER - Initializing Server";
 	[] execVM "server\init.sqf";
+	
+	//[AiCacheDistance(players),TargetFPS(-1 for Auto),Debug,CarCacheDistance,AirCacheDistance,BoatCacheDistance]execvm "zbe_cache\main.sqf";
+	[1500,0,false,200,1500,1500]execVM "addons\zbe_cache\main.sqf"
 };
 
 //init 3rd Party Scripts
+[] execVM "addons\vactions\functions.sqf";
+[] execVM "addons\parking\functions.sqf";
+[] execVM "addons\storage\functions.sqf";
 [] execVM "addons\R3F_ARTY_AND_LOG\init.sqf";
 [] execVM "addons\proving_ground\init.sqf";
 [] execVM "addons\scripts\DynamicWeatherEffects.sqf";
 [] execVM "addons\JumpMF\init.sqf";
+[] execVM "addons\Explosives-To-Vehicle\init.sqf";
+[] execVM "addons\JTS_PM\Functions.sqf";
+[] execVM "addons\scripts\servercredits.sqf";
+[] execVM "addons\scripts\zlt_fastrope.sqf";
+[] execVM "addons\outlw_magRepack\MagRepack_init_sv.sqf";
