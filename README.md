@@ -43,7 +43,7 @@ If you are looking for the prebuilt PBO files head over to the [Release Files](h
   };
 </pre>
 0. Start the Arma 3 server
-<pre>./arma3server -sock_host=127.0.0.1 -sock_port=1337 -profiles=server -config=server/server.cfg -cfg=server/arma3.cfg -port=2302</pre>
+<pre>./arma3server -sock_host=127.0.0.1 -sock_port=1337 -profiles=server -config=server/server.cfg -cfg=server/arma3.cfg -port=2302 -filePatching</pre>
 
 
 ###Help###
