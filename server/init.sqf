@@ -10,8 +10,6 @@
 
 // All the "hasInterface" and "isServer" checks are to allow this file to be executed on a headless client to offload object saving
 
-if (!isServer) exitWith {};
-
 if (!isServer && hasInterface) exitWith {};
 
 externalConfigFolder = "\A3Wasteland_settings";
@@ -35,7 +33,7 @@ if (isServer) then
     {
       if (!(_unit call A3W_fnc_isUnconscious) && {!isNil "isConfigOn" && {["A3W_playerSaving"] call isConfigOn}}) then
       {
-        if (!(_unit getVariable ["playerSpawning", false]) && getText (configFile >> "CfgVehicles" >> typeOf _unit >> "simulation") != "headlessclient") then
+        if (!(_unit getVariable ["playerSpawning", true]) && getText (configFile >> "CfgVehicles" >> typeOf _unit >> "simulation") != "headlessclient") then
         {
           [_uid, [], [_unit, false] call fn_getPlayerData] spawn fn_saveAccount;
         };
